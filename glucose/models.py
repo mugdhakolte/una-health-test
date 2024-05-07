@@ -12,6 +12,9 @@ class User(models.Model):
         """Meta class for User."""
 
         db_table = "User"
+        indexes = [
+            models.Index(fields=["user_id"]),
+        ]
 
     def __str__(self):
         """
@@ -37,6 +40,10 @@ class Device(models.Model):
         """Meta class for Device."""
 
         db_table = "Device"
+        indexes = [
+            models.Index(fields=["name"]),
+            models.Index(fields=["serial_no"]),
+        ]
 
     def __str__(self):
         """
@@ -77,6 +84,9 @@ class GlucoseLevel(models.Model):
 
         db_table = "GlucoseLevel"
         ordering = ["-device_timestamp"]
+        indexes = [
+            models.Index(fields=["device_timestamp"]),
+        ]
 
     def __str__(self):
         """
