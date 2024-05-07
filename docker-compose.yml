@@ -1,0 +1,30 @@
+services:
+  db_una:
+    image: postgres:latest
+    volumes:
+      - una_data:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+  web_una:
+    platform: linux/amd64
+    build: .
+    command: python manage.py runserver 0.0.0.0:8001
+    volumes:
+      - .:/code
+    ports:
+      - "8001:8001"
+    env_file: .env
+    environment:
+      - POSTGRES_NAME=${DB_NAME}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - db_una
+
+volumes:
+  una_data:
