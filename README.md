@@ -24,6 +24,10 @@
 	```bash
 	python manage.py runserver
 	```
+5) Running testcases
+	```bash
+	python manage.py test glucose
+	```
  
 ## Project Setup (Docker Compose):
 
