@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from models import User, GlucoseLevel, Device
+from glucose.models import User, GlucoseLevel, Device
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -22,11 +22,4 @@ class GlucoseLevelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GlucoseLevel
-        fields = [
-            "id",
-            "device",
-            "device_timestamp",
-            "recording_type",
-            "glucose_value_history",
-            "details",
-        ]
+        fields = "__all__"

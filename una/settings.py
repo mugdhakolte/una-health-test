@@ -133,7 +133,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+SPECTACULAR_SETTINGS = {"COMPONENT_SPLIT_REQUEST": True}
+
 REST_FRAMEWORK = {
-    # YOUR SETTINGS
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }

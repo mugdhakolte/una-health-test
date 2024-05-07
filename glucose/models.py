@@ -53,9 +53,24 @@ class GlucoseLevel(models.Model):
 
     device = models.ForeignKey("Device", on_delete=models.CASCADE)
     device_timestamp = models.DateTimeField()
-    recording_type = models.IntegerField()
-    glucose_value_history = models.IntegerField()
-    details = models.JSONField()
+    recording_type = models.IntegerField(blank=True, null=True)
+    glucose_value_history = models.IntegerField(blank=True, null=True)
+    glukose_scan_mg_dL = models.IntegerField(blank=True, null=True)
+    nicht_numerisches_schnellwirkendes_insulin = models.IntegerField(
+        blank=True, null=True
+    )
+    schnellwirkendes_insulin = models.IntegerField(blank=True, null=True)
+    nicht_numerische_nahrungsdaten = models.IntegerField(blank=True, null=True)
+    kohlenhydrate_gramm = models.IntegerField(blank=True, null=True)
+    kohlenhydrate_portionen = models.IntegerField(blank=True, null=True)
+    nicht_numerisches_depotinsulin = models.IntegerField(blank=True, null=True)
+    depotinsulin = models.IntegerField(blank=True, null=True)
+    notizen = models.IntegerField(blank=True, null=True)
+    glukose_teststreifen_mg_dL = models.IntegerField(blank=True, null=True)
+    keton_mmol_L = models.IntegerField(blank=True, null=True)
+    mahlzeiteninsulin = models.IntegerField(blank=True, null=True)
+    korrekturinsulin = models.IntegerField(blank=True, null=True)
+    insulin_anderung_durch_anwender = models.IntegerField(blank=True, null=True)
 
     class Meta:
         """Meta class for GlucoseLevel."""
