@@ -1,5 +1,13 @@
 # una-health-test
 
+The Una health test application consists of three models - User, Device, and GlucoseLevel using DRF and Postgresql.
+
+Following is the API list which sample application provides:
+
+- POST API (api/v1/data) with reads data from csv (Try in postman which takes input as csv file)
+- GET API (api/v1/levels) returns data of glucose levels in DB
+- GET API (api/v1/levels/<id>) return data of glucose level of <id> specified in API
+
 
 ## Tech stack used:
 
@@ -34,4 +42,8 @@
 1) Build
 	```bash
 	docker compose up --build
+	```
+2) Migrate
+	```bash
+	docker exec -it <container-id> python manage.py migrate
 	```
