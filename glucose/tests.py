@@ -1,6 +1,9 @@
 from django.test import TestCase
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APIClient
 
-from glucose.models import User, Device, GlucoseLevel
+from glucose.models import Device, GlucoseLevel, User
 
 
 class ModelTestCase(TestCase):
@@ -26,3 +29,18 @@ class ModelTestCase(TestCase):
         self.assertEqual(
             str(self.glucose_level.device_timestamp), "2022-01-01 12:00:00"
         )
+
+    def test_list_glucose_levels(self):
+        client = APIClient()
+        url = reverse("levels-list")
+        response = client.get(url, {"user_id": self.user.user_id})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data.get("results")), 1)
+
+    def test_retrieve_glucose_levels(self):
+        client = APIClient()
+        url = reverse("levels-detail", kwargs={"pk": self.glucose_level.pk})
+        response = client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

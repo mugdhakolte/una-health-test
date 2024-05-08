@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from glucose.models import User, GlucoseLevel, Device
+from glucose.models import Device, GlucoseLevel, User
 
 
 class UserSerializer(serializers.ModelSerializer):

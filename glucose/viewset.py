@@ -1,14 +1,12 @@
 import pandas as pd
-
-from rest_framework import viewsets, mixins, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import mixins, status, viewsets
 from rest_framework.response import Response
 
-from django_filters.rest_framework import DjangoFilterBackend
-
-from glucose.serializer import UserSerializer, GlucoseLevelSerializer
-from glucose.models import User, Device, GlucoseLevel
-from glucose.paginate import StandardResultsSetPagination
 from glucose.filters import GlucoseLevelFilter
+from glucose.models import Device, GlucoseLevel, User
+from glucose.paginate import StandardResultsSetPagination
+from glucose.serializer import GlucoseLevelSerializer, UserSerializer
 
 
 class DataViewset(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -84,7 +82,7 @@ class LevelViewset(
     list:
         Returns lists of glucose levels of user ids
 
-    retrieve:
+    detail:
         Retrieves particular glucose level by user id
     """
 

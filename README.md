@@ -47,3 +47,15 @@ Following is the API list which sample application provides:
 	```bash
 	docker exec -it <container-id> python manage.py migrate
 	```
+ 
+## Project formatting and Linting
+
+1) Using ruff 
+	```bash
+	ruff format .
+	ruff check .
+	```
+2) Using Black
+	```bash
+	black .
+	```
