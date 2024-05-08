@@ -23,3 +23,7 @@ class GlucoseLevelSerializer(serializers.ModelSerializer):
     class Meta:
         model = GlucoseLevel
         fields = "__all__"
+
+
+class FileUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()

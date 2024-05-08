@@ -1,42 +1,29 @@
 import pandas as pd
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
 from glucose.filters import GlucoseLevelFilter
 from glucose.models import Device, GlucoseLevel, User
 from glucose.paginate import StandardResultsSetPagination
-from glucose.serializer import GlucoseLevelSerializer, UserSerializer
+from glucose.serializer import (
+    GlucoseLevelSerializer,
+    UserSerializer,
+    FileUploadSerializer,
+)
 
 
+@extend_schema_view(
+    create=extend_schema(description="creates data in DB which reads from csv files")
+)
 class DataViewset(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    """
-    create:
-        creates data in DB which reads from csv files
-    """
-
     serializer_class = UserSerializer
+    parser_classes = [MultiPartParser, FormParser]
 
-    def create(self, request, *args, **kwargs):
-        csv_file = request.FILES.get("file")
-        if not csv_file:
-            return Response(
-                {"detail": "CSV file is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            df = pd.read_csv(
-                csv_file,
-                encoding="utf-8",
-                skiprows=1,
-            )
-            df = df.fillna(0)
-        except Exception as e:
-            return Response(
-                {"detail": f"Error reading CSV file: {str(e)}"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
+    @staticmethod
+    def process_csv(self, df, csv_file):
         for index, row in df.iterrows():
             user_id = csv_file.name.split(".")[0]
             user, _ = User.objects.get_or_create(user_id=user_id)
@@ -68,24 +55,48 @@ class DataViewset(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 korrekturinsulin=row["Insulin-Änderung durch Anwender (Einheiten)"],
             )
 
+    @extend_schema(request=FileUploadSerializer)
+    def create(self, request, *args, **kwargs):
+        serializer = FileUploadSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        csv_file = serializer.validated_data["file"]
+        if not csv_file:
+            return Response(
+                {"detail": "CSV file is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            df = pd.read_csv(
+                csv_file,
+                low_memory=True,
+                encoding="utf-8",
+                skiprows=1,
+            )
+            df = df.fillna(0)
+        except Exception as e:
+            return Response(
+                {"detail": f"Error reading CSV file: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        DataViewset.process_csv(self, df, csv_file)
+
         return Response(
             {"detail": "Data uploaded successfully"}, status=status.HTTP_201_CREATED
         )
 
 
+@extend_schema_view(
+    list=extend_schema(description="Returns lists of glucose levels of user ids"),
+    retrieve=extend_schema(description="Retrieves particular glucose level by id"),
+)
 class LevelViewset(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
-    """
-    list:
-        Returns lists of glucose levels of user ids
-
-    detail:
-        Retrieves particular glucose level by user id
-    """
-
     queryset = GlucoseLevel.objects.all()
     serializer_class = GlucoseLevelSerializer
     filter_backends = (DjangoFilterBackend,)
