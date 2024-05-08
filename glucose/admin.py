@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from glucose.models import User, Device, GlucoseLevel
+from glucose.models import Device, GlucoseLevel, User
 
 
 class UserAdmin(admin.ModelAdmin):

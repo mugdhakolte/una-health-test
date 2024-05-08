@@ -59,3 +59,7 @@ Following is the API list which sample application provides:
 	```bash
 	black .
 	```
+3) Using isort
+	```bash
+	isort . --profile black
+	```

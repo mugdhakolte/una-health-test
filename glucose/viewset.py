@@ -1,7 +1,12 @@
+import json
+from datetime import datetime
+
 import pandas as pd
+from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
@@ -9,9 +14,9 @@ from glucose.filters import GlucoseLevelFilter
 from glucose.models import Device, GlucoseLevel, User
 from glucose.paginate import StandardResultsSetPagination
 from glucose.serializer import (
+    FileUploadSerializer,
     GlucoseLevelSerializer,
     UserSerializer,
-    FileUploadSerializer,
 )
 
 
@@ -91,6 +96,8 @@ class DataViewset(mixins.CreateModelMixin, viewsets.GenericViewSet):
 @extend_schema_view(
     list=extend_schema(description="Returns lists of glucose levels of user ids"),
     retrieve=extend_schema(description="Retrieves particular glucose level by id"),
+    export_to_csv=extend_schema(description="export response to csv format"),
+    export_to_json=extend_schema(description="export response to json format"),
 )
 class LevelViewset(
     mixins.ListModelMixin,
@@ -102,3 +109,40 @@ class LevelViewset(
     filter_backends = (DjangoFilterBackend,)
     filterset_class = GlucoseLevelFilter
     pagination_class = StandardResultsSetPagination
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name="start_timestamp", type=str),
+            OpenApiParameter(name="end_timestamp", type=str),
+            OpenApiParameter(name="user_id", type=str),
+        ]
+    )
+    @action(detail=False, methods=["get"])
+    def export_to_csv(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = GlucoseLevelSerializer(queryset, many=True)
+        df = pd.DataFrame(serializer.data)
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = (
+            f'attachment; filename="glucose_levels_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"'
+        )
+        df.to_csv(path_or_buf=response, index=False)
+        return response
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name="start_timestamp", type=str),
+            OpenApiParameter(name="end_timestamp", type=str),
+            OpenApiParameter(name="user_id", type=str),
+        ]
+    )
+    @action(detail=False, methods=["get"])
+    def export_to_json(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = GlucoseLevelSerializer(queryset, many=True)
+        response_data = json.dumps(serializer.data)
+        response = HttpResponse(response_data, content_type="application/json")
+        response["Content-Disposition"] = (
+            f'attachment; filename="glucose_levels_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"'
+        )
+        return response
