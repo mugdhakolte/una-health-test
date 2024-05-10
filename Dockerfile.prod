@@ -1,0 +1,62 @@
+## BUILDER ##
+
+FROM python:latest as builder
+
+RUN apt-get update \
+  && apt-get -y install netcat-traditional gcc postgresql \
+  && apt-get clean
+
+WORKDIR /usr/src/app
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+RUN pip install --upgrade pip
+COPY ./requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+
+COPY . /usr/src/app/
+RUN pip install flake8 black isort
+RUN flake8 --exclude=venv, glucose/migrations .
+RUN black . --check
+RUN isort . --profile black --check-only
+
+## FINAL ##
+
+FROM python:latest
+
+RUN mkdir -p /home/app
+
+RUN addgroup --system una_user && adduser --system --group una_user
+
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+
+RUN mkdir $APP_HOME
+WORKDIR $APP_HOME
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV ENVIRONMENT prod
+ENV TESTING 0
+
+RUN apt-get update \
+  && apt-get -y install netcat-traditional gcc postgresql \
+  && apt-get clean
+
+
+COPY --from=builder /usr/src/app/wheels /wheels
+COPY --from=builder /usr/src/app/requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install --no-cache /wheels/*
+
+COPY . $APP_HOME
+
+ADD entrypoint.sh ./entrypoint.sh
+RUN chmod a+x ./entrypoint.sh
+
+RUN chown -R una_user:una_user $APP_HOME
+
+USER una_user
+
+ENTRYPOINT ["./entrypoint.sh"]
