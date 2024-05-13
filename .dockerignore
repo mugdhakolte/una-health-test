@@ -1,0 +1,4 @@
+.dockerignore
+Dockerfile
+sample-data
+Dockerfile.prod

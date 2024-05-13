@@ -34,6 +34,8 @@ jobs:
           file: ./Dockerfile.prod
           push: true
           tags: ${{ env.IMAGE }}-builder:latest
+          build-args: |
+            SECRET_KEY=$SECRET_KEY
           cache-from: type=registry,ref=${{ env.IMAGE }}-builder:latest
           cache-to: type=inline
 
@@ -44,6 +46,8 @@ jobs:
           file: ./Dockerfile.prod
           push: true
           tags: ${{ env.IMAGE }}-final:latest
+          build-args: |
+            SECRET_KEY=$SECRET_KEY
           cache-from: type=registry,ref=${{ env.IMAGE }}-final:latest
           cache-to: type=inline
 
@@ -82,8 +86,10 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile.prod
-          push: true
+          load: true
           tags: ${{ env.IMAGE }}-builder:latest
+          build-args: |
+            SECRET_KEY=$SECRET_KEY
           cache-from: type=registry,ref=${{ env.IMAGE }}-builder:latest
           cache-to: type=inline
 
@@ -92,8 +98,10 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile.prod
-          push: true
+          load: true
           tags: ${{ env.IMAGE }}-final:latest
+          build-args: |
+            SECRET_KEY=$SECRET_KEY
           cache-from: type=registry,ref=${{ env.IMAGE }}-final:latest
           cache-to: type=inline
 
@@ -102,7 +110,6 @@ jobs:
           docker run \
             -d \
             --name una-glucose \
-            --network host \
             -e DATABASE_URL=postgres://${{ env.DB_USER }}:${{ env.DB_PASSWORD }}@localhost:5432/${{ env.DB_NAME }} \
             -e DATABASE_TEST_URL=postgres://${{ env.DB_USER }}:${{ env.DB_PASSWORD }}@localhost:5432/${{ env.DB_NAME }} \
             ${{ env.IMAGE }}-final:latest

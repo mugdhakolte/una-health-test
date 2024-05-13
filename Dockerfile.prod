@@ -1,6 +1,6 @@
 ## BUILDER ##
 
-FROM python:latest as builder
+FROM python:3.12.3-slim as builder
 
 RUN apt-get update \
   && apt-get -y install netcat-traditional gcc postgresql \
@@ -15,7 +15,7 @@ RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
 
-COPY . /usr/src/app/
+COPY . .
 RUN pip install flake8 black isort
 RUN flake8 --exclude=venv, glucose/migrations .
 RUN black . --check
@@ -23,22 +23,16 @@ RUN isort . --profile black --check-only
 
 ## FINAL ##
 
-FROM python:latest
+FROM python:3.12.3-slim
 
-RUN mkdir -p /home/app
-
-RUN addgroup --system una_user && adduser --system --group una_user
-
-ENV HOME=/home/app
-ENV APP_HOME=/home/app/web
-
-RUN mkdir $APP_HOME
-WORKDIR $APP_HOME
+WORKDIR /usr/src/app
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ENV ENVIRONMENT prod
-ENV TESTING 0
+ENV DEBUG 0
+ARG SECRET_KEY
+ENV SECRET_KEY $SECRET_KEY
+ENV DJANGO_ALLOWED_HOSTS *
 
 RUN apt-get update \
   && apt-get -y install netcat-traditional gcc postgresql \
@@ -50,13 +44,12 @@ COPY --from=builder /usr/src/app/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache /wheels/*
 
-COPY . $APP_HOME
+COPY . .
 
-ADD entrypoint.sh ./entrypoint.sh
-RUN chmod a+x ./entrypoint.sh
+# add and run as non-root user
+RUN adduser --disabled-password unauser
+USER unauser
 
-RUN chown -R una_user:una_user $APP_HOME
+# run gunicorn
+CMD gunicorn una.wsgi:application --bind 0.0.0.0:$PORT
 
-USER una_user
-
-ENTRYPOINT ["./entrypoint.sh"]
