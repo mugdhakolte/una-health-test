@@ -74,60 +74,34 @@ jobs:
         with:
           ref: master
 
-      - name: Log in to Github Packages
-        uses: docker/login-action@v3
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push builder Image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./
-          file: ./Dockerfile.prod
-          load: true
-          tags: ${{ env.IMAGE }}-builder:latest
-          build-args: |
-            SECRET_KEY=$SECRET_KEY
-          cache-from: type=registry,ref=${{ env.IMAGE }}-builder:latest
-          cache-to: type=inline
-
-      - name: Build and push final Image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./
-          file: ./Dockerfile.prod
-          load: true
-          tags: ${{ env.IMAGE }}-final:latest
-          build-args: |
-            SECRET_KEY=$SECRET_KEY
-          cache-from: type=registry,ref=${{ env.IMAGE }}-final:latest
-          cache-to: type=inline
-
-      - name: Run container
-        run: |
-          docker run \
-            -d \
-            --name una-glucose \
-            -e DATABASE_URL=postgres://${{ env.DB_USER }}:${{ env.DB_PASSWORD }}@localhost:5432/${{ env.DB_NAME }} \
-            -e DATABASE_TEST_URL=postgres://${{ env.DB_USER }}:${{ env.DB_PASSWORD }}@localhost:5432/${{ env.DB_NAME }} \
-            ${{ env.IMAGE }}-final:latest
+          python-version: '3.12'
+          cache: 'pip'
 
       - name: Install requirements
-        run: docker exec una-glucose pip install black==24.4.0 isort==5.13.2 pytest==8.1.1
+        run: pip install -r requirements.txt
 
       - name: Django Unit tests
-        run: docker exec una-glucose python manage.py test
+        env:
+          DJANGO_ALLOWED_HOSTS: localhost
+          SECRET_KEY: cff7978cc78aafa256f4ec926508567981578f80e16c313303
+          DB_HOST: localhost
+          DB_NAME: ${{ env.DB_NAME }}
+          DB_USERNAME: ${{ env.DB_USER }}
+          DB_PASSWORD: ${{ env.DB_PASSWORD }}
+          DB_PORT: 5432
+        run: python manage.py test
 
-      - name: Pytest
-        run: docker exec una-glucose python -m pytest .
+      - name: Install dev requirements
+        run: pip install -r requirements-dev.txt
 
       - name: Black
-        run: docker exec una-glucose python -m black . --check
+        run: python -m black . --check
 
       - name: isort
-        run: docker exec una-glucose python -m isort . --profile black --check-only
+        run: python -m isort . --profile black --check-only
 
       - name: Ruff
         uses: chartboost/ruff-action@v1
