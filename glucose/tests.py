@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -13,7 +16,10 @@ class ModelTestCase(TestCase):
             name="test_device", serial_no="123456", user=self.user
         )
         self.glucose_level = GlucoseLevel.objects.create(
-            device=self.device, device_timestamp="2022-01-01 12:00:00"
+            device=self.device,
+            device_timestamp=timezone.make_aware(
+                datetime.strptime("2022-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+            ),
         )
 
     def test_user_creation(self):
@@ -27,7 +33,7 @@ class ModelTestCase(TestCase):
     def test_glucose_level_creation(self):
         self.assertEqual(self.glucose_level.device, self.device)
         self.assertEqual(
-            str(self.glucose_level.device_timestamp), "2022-01-01 12:00:00"
+            str(self.glucose_level.device_timestamp), "2022-01-01 12:00:00+00:00"
         )
 
     def test_list_glucose_levels(self):

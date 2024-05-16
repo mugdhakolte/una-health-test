@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pandas as pd
 from django.http import HttpResponse
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
@@ -40,7 +41,9 @@ class DataViewset(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
             GlucoseLevel.objects.create(
                 device=device,
-                device_timestamp=pd.to_datetime(row["Gerätezeitstempel"]),
+                device_timestamp=timezone.make_aware(
+                    pd.to_datetime(row["Gerätezeitstempel"], dayfirst=True)
+                ),
                 recording_type=row["Aufzeichnungstyp"],
                 glucose_value_history=row["Glukosewert-Verlauf mg/dL"],
                 glukose_scan_mg_dL=row["Glukose-Scan mg/dL"],
