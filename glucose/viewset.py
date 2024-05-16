@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 import pandas as pd
+from django.db.models import Max, Min
 from django.http import HttpResponse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -16,6 +17,7 @@ from glucose.models import Device, GlucoseLevel, User
 from glucose.paginate import StandardResultsSetPagination
 from glucose.serializer import (
     FileUploadSerializer,
+    GlucoseLevelMixMaxSerializer,
     GlucoseLevelSerializer,
     UserSerializer,
 )
@@ -112,6 +114,24 @@ class LevelViewset(
     filter_backends = (DjangoFilterBackend,)
     filterset_class = GlucoseLevelFilter
     pagination_class = StandardResultsSetPagination
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name="start_timestamp", type=str),
+            OpenApiParameter(name="end_timestamp", type=str),
+            OpenApiParameter(name="user_id", type=str),
+        ]
+    )
+    @action(detail=False, methods=["get"])
+    def min_max_glucose(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        min_max_levels = queryset.aggregate(
+            min_glucose_level=Min("glucose_value_history"),
+            max_glucose_level=Max("glukose_scan_mg_dL"),
+        )
+        serializer = GlucoseLevelMixMaxSerializer(data=min_max_levels)
+        serializer.is_valid()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
         parameters=[

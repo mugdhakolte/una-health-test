@@ -27,3 +27,8 @@ class GlucoseLevelSerializer(serializers.ModelSerializer):
 
 class FileUploadSerializer(serializers.Serializer):
     file = serializers.FileField()
+
+
+class GlucoseLevelMixMaxSerializer(serializers.Serializer):
+    min_glucose_level = serializers.IntegerField()
+    max_glucose_level = serializers.IntegerField()
