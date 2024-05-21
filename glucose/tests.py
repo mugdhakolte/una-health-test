@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 
 from django.test import TestCase
@@ -11,7 +12,7 @@ from glucose.models import Device, GlucoseLevel, User
 
 class ModelTestCase(TestCase):
     def setUp(self):
-        self.user = User.objects.create(user_id="test_user")
+        self.user = User.objects.create(user_id=uuid.uuid4())
         self.device = Device.objects.create(
             name="test_device", serial_no="123456", user=self.user
         )
@@ -23,7 +24,8 @@ class ModelTestCase(TestCase):
         )
 
     def test_user_creation(self):
-        self.assertEqual(self.user.user_id, "test_user")
+        self.assertIsInstance(self.user.user_id, uuid.UUID)
+        self.assertEqual(self.user, User.objects.get(user_id=self.user.user_id))
 
     def test_device_creation(self):
         self.assertEqual(self.device.name, "test_device")

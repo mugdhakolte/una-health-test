@@ -6,7 +6,7 @@ class User(models.Model):
     Class representing User Model.
     """
 
-    user_id = models.CharField(max_length=100)
+    user_id = models.UUIDField(editable=False, unique=True)
 
     class Meta:
         """Meta class for User."""

@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from uuid import UUID
 
 import pandas as pd
 from django.db.models import Max, Min
@@ -33,7 +34,7 @@ class DataViewset(mixins.CreateModelMixin, viewsets.GenericViewSet):
     @staticmethod
     def process_csv(self, df, csv_file):
         for index, row in df.iterrows():
-            user_id = csv_file.name.split(".")[0]
+            user_id = UUID(csv_file.name.split(".")[0])
             user, _ = User.objects.get_or_create(user_id=user_id)
             device_serial_no = row["Seriennummer"]
             device, _ = Device.objects.get_or_create(
