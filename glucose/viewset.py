@@ -118,9 +118,21 @@ class LevelViewset(
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(name="start_timestamp", type=str),
-            OpenApiParameter(name="end_timestamp", type=str),
-            OpenApiParameter(name="user_id", type=str),
+            OpenApiParameter(
+                name="start_timestamp",
+                type=str,
+                description="2021-02-14 16:50:00+00:00",
+            ),
+            OpenApiParameter(
+                name="end_timestamp",
+                type=str,
+                description="2021-02-25 17:08:00+00:00",
+            ),
+            OpenApiParameter(
+                name="user_id",
+                type=str,
+                description="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            ),
         ]
     )
     @action(detail=False, methods=["get"])
@@ -136,9 +148,21 @@ class LevelViewset(
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(name="start_timestamp", type=str),
-            OpenApiParameter(name="end_timestamp", type=str),
-            OpenApiParameter(name="user_id", type=str),
+            OpenApiParameter(
+                name="start_timestamp",
+                type=str,
+                description="2021-02-14 16:50:00+00:00",
+            ),
+            OpenApiParameter(
+                name="end_timestamp",
+                type=str,
+                description="2021-02-25 17:08:00+00:00",
+            ),
+            OpenApiParameter(
+                name="user_id",
+                type=str,
+                description="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            ),
         ]
     )
     @action(detail=False, methods=["get"])
@@ -155,9 +179,21 @@ class LevelViewset(
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(name="start_timestamp", type=str),
-            OpenApiParameter(name="end_timestamp", type=str),
-            OpenApiParameter(name="user_id", type=str),
+            OpenApiParameter(
+                name="start_timestamp",
+                type=str,
+                description="2021-02-14 16:50:00+00:00",
+            ),
+            OpenApiParameter(
+                name="end_timestamp",
+                type=str,
+                description="2021-02-25 17:08:00+00:00",
+            ),
+            OpenApiParameter(
+                name="user_id",
+                type=str,
+                description="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            ),
         ]
     )
     @action(detail=False, methods=["get"])
