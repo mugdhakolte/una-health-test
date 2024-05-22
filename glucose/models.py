@@ -1,12 +1,15 @@
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
 
 
-class User(models.Model):
+class User(AbstractBaseUser):
     """
     Class representing User Model.
     """
 
     user_id = models.UUIDField(editable=False, unique=True)
+
+    USERNAME_FIELD = "user_id"
 
     class Meta:
         """Meta class for User."""
